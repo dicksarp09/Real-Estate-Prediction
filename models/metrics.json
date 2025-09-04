@@ -1,0 +1,5 @@
+{
+  "rmse": 5.193318855518075,
+  "r2": 0.777726247201806,
+  "model_path": "models/price_pipeline.joblib"
+}
