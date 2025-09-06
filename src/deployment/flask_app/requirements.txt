@@ -1,5 +1,7 @@
-Flask
-scikit-learn
+# requirements.txt
+flask
 joblib
-pytest
+scikit-learn
+pandas
 requests
+pytest
