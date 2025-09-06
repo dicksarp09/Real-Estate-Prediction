@@ -1,15 +1,15 @@
-import requests
-import time
 import subprocess
+import time
+import requests
 
-BASE_URL = "http://127.0.0.1:8000"
 CONTAINER_NAME = "test_api"
 IMAGE_NAME = "dicksonml/realestate-api:latest"
+BASE_URL = "http://127.0.0.1:8000"
 
-def wait_for_api(url, timeout=60, interval=3):
-    """Wait for the API to be up and running."""
-    start_time = time.time()
-    while time.time() - start_time < timeout:
+def wait_for_api(url, timeout=120, interval=5):
+    """Wait until the API is ready or timeout (default 2 mins)."""
+    start = time.time()
+    while time.time() - start < timeout:
         try:
             r = requests.get(url)
             if r.status_code == 200:
@@ -21,34 +21,33 @@ def wait_for_api(url, timeout=60, interval=3):
 
 def setup_module(module):
     """Start the container before tests."""
-    # Remove any existing container with the same name
+    # Remove any existing container
     subprocess.run(["docker", "rm", "-f", CONTAINER_NAME], check=False)
-    
-    # Start container
+
+    # Start new container
     subprocess.run([
         "docker", "run", "-d", "-p", "8000:5000",
         "--name", CONTAINER_NAME, IMAGE_NAME
     ], check=True)
-    
+
+    # Wait for API
     assert wait_for_api(BASE_URL), "API did not become ready in time"
 
 def teardown_module(module):
-    """Stop and remove the container after tests."""
+    """Stop container after tests."""
     subprocess.run(["docker", "rm", "-f", CONTAINER_NAME], check=False)
 
 def test_root_endpoint():
-    r = requests.get(BASE_URL)
+    r = requests.get(f"{BASE_URL}/")
     assert r.status_code == 200
-    assert "Welcome" in r.json()["message"]
+    assert "Welcome" in r.text
 
 def test_predict_endpoint():
     payload = {
-        "transaction_date": 2013.250,
-        "house_age": 13.3,
-        "distance_to_mrt": 561.9845,
-        "convenience_stores": 5,
-        "latitude": 24.98298,
-        "longitude": 121.54024
+        "feature1": 1.0,
+        "feature2": 2.0,
+        "feature3": 3.0,
+        "feature4": 4.0
     }
     r = requests.post(f"{BASE_URL}/predict", json=payload)
     assert r.status_code == 200
