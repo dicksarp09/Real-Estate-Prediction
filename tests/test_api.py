@@ -6,13 +6,12 @@ CONTAINER_NAME = "test_api"
 IMAGE_NAME = "dicksonml/realestate-api:latest"
 BASE_URL = "http://127.0.0.1:8000"
 
-def wait_for_api(url, timeout=120, interval=5):
-    """Wait until the API is ready or timeout (default 2 mins)."""
+def wait_for_api(url, timeout=120, interval=5):  # wait up to 2 minutes
     start = time.time()
     while time.time() - start < timeout:
         try:
-            r = requests.get(url)
-            if r.status_code == 200:
+            response = requests.get(url)
+            if response.status_code == 200:
                 return True
         except requests.exceptions.ConnectionError:
             pass
@@ -21,17 +20,16 @@ def wait_for_api(url, timeout=120, interval=5):
 
 def setup_module(module):
     """Start the container before tests."""
-    # Remove any existing container
     subprocess.run(["docker", "rm", "-f", CONTAINER_NAME], check=False)
 
-    # Start new container
     subprocess.run([
         "docker", "run", "-d", "-p", "8000:5000",
         "--name", CONTAINER_NAME, IMAGE_NAME
     ], check=True)
 
-    # Wait for API
-    assert wait_for_api(BASE_URL), "API did not become ready in time"
+    if not wait_for_api(BASE_URL):
+        subprocess.run(["docker", "logs", CONTAINER_NAME])
+        assert False, "API did not become ready in time"
 
 def teardown_module(module):
     """Stop container after tests."""
