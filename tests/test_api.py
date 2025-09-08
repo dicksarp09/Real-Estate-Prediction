@@ -42,10 +42,12 @@ def test_root_endpoint():
 
 def test_predict_endpoint():
     payload = {
-        "feature1": 1.0,
-        "feature2": 2.0,
-        "feature3": 3.0,
-        "feature4": 4.0
+        "transaction_date": 2013.167,   # example value
+        "house_age": 10.0,
+        "distance_to_mrt": 500.0,
+        "convenience_stores": 5,
+        "latitude": 24.982,
+        "longitude": 121.543
     }
     r = requests.post(f"{BASE_URL}/predict", json=payload)
     assert r.status_code == 200
