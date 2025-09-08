@@ -1,0 +1,7 @@
+# requirements.txt
+flask
+joblib
+scikit-learn
+pandas
+requests
+pytest
